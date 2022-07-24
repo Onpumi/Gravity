@@ -5,7 +5,7 @@ using UnityEngine;
 public class ControlCamera : MonoBehaviour
 {
     [SerializeField] private Transform _player;
-    [SerializeField] [Range(0, 1f)] private float _dumping;
+    [SerializeField] [Range(0, 10f)] private float _dumping;
     [SerializeField] [Range(0, 5f)] private float _offsetX;
     [SerializeField] [Range(0, 5f)] private float _offsetY;
 

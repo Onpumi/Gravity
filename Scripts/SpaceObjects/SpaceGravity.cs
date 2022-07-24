@@ -7,9 +7,10 @@ public class SpaceGravity : MonoBehaviour
 {
    [SerializeField]  private float _maxGravityDistance;
    [SerializeField]  private Hero _hero;
-   [SerializeField]  private float _gravityForce;
    [SerializeField]  private HeroGround _heroground;
-   private float _minDistanceContact = 0.3f;
+   [SerializeField]  private float _gravityForceValue;
+   public float GravityForce { get { return _gravityForceValue; } }
+   private float MinDistanceContact { get { return 10f; } }
    private float _minGravityDistance;
    private List<Transform> _platforms;
    private Platform _nearPlatform;
@@ -17,6 +18,7 @@ public class SpaceGravity : MonoBehaviour
    private Collider2D[] _collidersPlatform;
    public List<Platform> SpacePlatforms { get; private set; }
    private List<Transform> _characters;
+   public float DistanceHero  { get; private set; }
    public Vector3 GravityVector {get; private set;}
 
    
@@ -77,7 +79,7 @@ public class SpaceGravity : MonoBehaviour
        { 
           var closestPoint = (Vector3)  _collidersPlatform[i].ClosestPoint(_hero.transform.localPosition);
           var positionHero = _hero.transform.localPosition;
-          if( Vector3.Distance(closestPoint, positionHero) <= _minDistanceContact )
+          if( Vector3.Distance(closestPoint, positionHero) <= MinDistanceContact )
          {
            vectorGravity += (closestPoint - positionHero);
            countVector++;
@@ -101,23 +103,23 @@ public class SpaceGravity : MonoBehaviour
             }
       }
       var collider = _nearPlatform.GetComponent<Collider2D>();
-      if( Vector3.Distance((Vector3) collider.ClosestPoint(_hero.transform.localPosition), _hero.transform.localPosition ) > _minDistanceContact )
+      DistanceHero = Vector3.Distance((Vector3) collider.ClosestPoint(_hero.transform.localPosition), _hero.transform.localPosition );
+      if( DistanceHero > MinDistanceContact )
       {
-       GravityVector = (Vector3) collider.ClosestPoint(_hero.transform.localPosition) - _hero.transform.localPosition;
-      // GravityVector = new Vector3(0,-1,0);
+         GravityVector = (Vector3) collider.ClosestPoint(_hero.transform.localPosition) - _hero.transform.localPosition;
       }
       else 
       {
-         GravityVector = GetGravityVector();
+         GravityVector = -_heroground.GetNormalWithRaycast();
+       //  GravityVector = (Vector3) collider.ClosestPoint(_hero.transform.localPosition) - _hero.transform.localPosition;
       }
        GravityVector.Normalize();
    }
 
+   public bool isMinDistanceContact => (DistanceHero <= MinDistanceContact);
+
    private void FixedUpdate()
    {     
-      if( _hero.IsGround == false )
-        {
            SetGravityVector( );
-        }
    }
 }

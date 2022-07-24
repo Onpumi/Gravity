@@ -1,32 +1,60 @@
+using System;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.Events;
+//using UnityEngine.Events;
 using UnityEngine.EventSystems;
+using System.Collections.Generic;
 
 
-public class HeroInput : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
+
+
+public class HeroInput : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IDragHandler
 {
+  
   private Hero _hero;
-  public event UnityAction<HeroInput> buttonDown;
-  public event UnityAction<HeroInput> buttonUp;
-  public event UnityAction buttonJump;
+  
+
+  public event Action<HeroInput> ButtonDown;
+  public event Action Jumper;
+  public event Action ButtonUp;
+  private GraphicRaycaster m_Raycaster;
+  private PointerEventData m_PointerEventData;
+  private EventSystem m_EventSystem;
+
 
    private void Awake()
   {
   	_hero = GetComponent<Hero>();
+    m_Raycaster = GetComponent<GraphicRaycaster>();
+    m_EventSystem = GetComponent<EventSystem>();
+    
   }
+
+  
+
    private void Update()
   {
-  //  if ( Input.GetAxis("Horizontal") > 0 ) _mover.StartMove(StateType.Right);
-	//  else if ( Input.GetAxis("Horizontal") < 0 ) _mover.StartMove(StateType.Left);
+
+    if(Input.GetKeyDown(KeyCode.Mouse0))
+    {
+    //   m_PointerEventData = new PointerEventData(m_EventSystem);
+  //     m_PointerEventData.position = Input.mousePosition;
+//       List<RaycastResult> results = new List<RaycastResult>();
+//       m_Raycaster.Raycast(m_PointerEventData, results);
+   //   foreach(RaycastResult result in results)
+    //  {
+       // Debug.Log($" Hit {result.gameObject.name}");
+    //  }
+    }
+
     if(Input.GetKeyDown(KeyCode.M))
 		{
-      buttonJump?.Invoke();
+      
 		}
 
     if( Input.GetKeyDown(KeyCode.B) )
     {
-      Debug.Log(_hero.heroState);
+
     }
 
     if( Input.GetAxis("Cancel") > 0 )
@@ -36,14 +64,30 @@ public class HeroInput : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
 
   }
 
-  public void OnPointerDown(PointerEventData e)
+  public void OnPointerDown(PointerEventData eventData)
   {
-    buttonDown?.Invoke(this);
+    //Debug.Log(eventData.pointerCurrentRaycast.gameObject);
+    //  SelectedButton = eventData.pointerCurrentRaycast.gameObject.transform;
+
   }
 
-   public void OnPointerUp(PointerEventData e)
+      public void OnDrag(PointerEventData eventData)
+    {
+        //Position = eventData.position;
+        //Delta = eventData.delta;
+        //Debug.Log(eventData.delta);
+        //transform.position = eventData.pointerCurrentRaycast.screenPosition;
+    }
+
+
+   public void OnPointerUp(PointerEventData eventData)
   {
-    buttonUp?.Invoke(this);
+    ButtonUp?.Invoke();
+  }
+
+  private void OnButtonClicked()
+  {
+    //  ButtonDown?.Invoke();
   }
 
 }

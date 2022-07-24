@@ -10,52 +10,40 @@ using UnityEngine.UI;
 
 [RequireComponent(typeof(Hero))]
 
-
-
 public class Hero : MonoBehaviour
 {
-
-   [SerializeField] private Transform _buttonsHero;
-	[SerializeField] public  float speed;
-	[SerializeField] private float jspeed;
+   [SerializeField] private Transform _buttonsControl;
+   [SerializeField] private TransitionMoveLeft _buttonLeftRun;
+   [SerializeField] private TransitionMoveRight _buttonRightRun;
+   [SerializeField] private Button _buttonJump;
+	[SerializeField] private float _speed;
+	[SerializeField] private float _jumpForce;
+   [SerializeField] private Transform _legs;
+   [SerializeField] private LayerMask _maskaPlace;
+   IMoverState _typeMove = new Stoping();
    public Sprite Sprite { get; private set; }
-	public IHeroState  heroState;
-	private HeroInput[] _heroInputs;
-	private bool _facingRight = true;
-//	private int _facingDir = 1;
-//	public int facingDir => _facingDir;
+	private bool _faceDirectionRight;
 	private bool _isGround = false;
-	public Vector3 DirGravity { get; private set; }
-   private CircleCollider2D _collider;
-   public CircleCollider2D collider => _collider;
-   public List<Collider2D> TouchGroundColliders {get; private set; }
    public bool IsGround => _isGround;
    public event Action<Collision2D> ContactGround;
-   public event Action<Hero> UpdateDirectionFall;
-   public ActionsHero actionsHero;
-
+   public int FaceDirection =>  (_faceDirectionRight) ? (1) : (-1);
+   public float Speed  { get => _speed; }
+   public float JumpForce { get => _jumpForce; }
+   private Rigidbody2D _rigidbody;
 
    private void Awake()
    {
-      _collider = GetComponent<CircleCollider2D>();
       Sprite = GetComponent<SpriteRenderer>().sprite;
-      TouchGroundColliders = new List<Collider2D>();
-      actionsHero = ScriptableObject.CreateInstance<ActionsHero>();
-    //  Vector3 v = new Vector3(1,1,1);
-   //  Sprite.bounds.Encapsulate(v);
-    //  Debug.Log($"Sprite - {Sprite.bounds.min}");
+      _rigidbody = GetComponent<Rigidbody2D>();
    }
 
-
-
 	private void OnCollisionEnter2D( Collision2D coll ) 
-     {
-  	     if( coll.collider.tag == "Green" ) 
-	     { 
-	  	    _isGround = true;
-            TouchGroundColliders.Add(coll.collider);
-	     }
+   {
+     if( coll.collider.tag == "Green" ) 
+     { 
+ 	    _isGround = true;
      }
+   }
 
        private void OnCollisionStay2D( Collision2D coll )
      {
@@ -66,103 +54,60 @@ public class Hero : MonoBehaviour
      }
 
        private void OnCollisionExit2D(Collision2D coll)
-     {
+    {
 	     if(coll.collider.tag == "Green")  
         {
           _isGround = false;
-          TouchGroundColliders.Remove(coll.collider);
-          //Debug.Log(TouchGroundColliders.Count);
         }
-     }
+    }
 
-     public void SetDirection( IHeroState State )
+     bool isNotIdentityFaceDirection( float x1, float x2 )  => ( (x1 < 0) && (x2 > 0)  || (x1 > 0) && (x2 < 0) );
+     public void SetFaceDirection( int direction )
    {
-	    Vector3 localScale = transform.localScale;
-
-       if( State.actionValue == actionsHero.actionsValue["MoveRight"])
-       {
-         _facingRight = true;
-         
-       }
-       else if( State.actionValue == actionsHero.actionsValue["MoveLeft"])
-       {
-         _facingRight = false;
-         
-       }
-
-  	    localScale.x = (_facingRight) ? (localScale.x) : (-localScale.x);
-
-         if( _facingRight == true )
-         {
-            localScale.x *= (localScale.x < 0) ? (-1) : (1);
-         }
-         else
-         {
-            localScale.x *= (localScale.x < 0) ? (1) : (-1);
-         }
-	    transform.localScale = localScale;
+      _faceDirectionRight = (direction > 0) ? (true) : (false);
+	    Vector3 bufferLocalScale = transform.localScale ;
+       bufferLocalScale.x = (isNotIdentityFaceDirection( transform.localScale.x, FaceDirection )) ? (-bufferLocalScale.x) : (bufferLocalScale.x);
+       transform.localScale = bufferLocalScale;
    }
 
   private void OnEnable()
     {
-       var countButtons = _buttonsHero.childCount;
-       _heroInputs = new HeroInput[countButtons];
-
-       for(int i = 0 ; i < countButtons; i++)
-       {
-         _heroInputs[i] = _buttonsHero.GetChild(i).GetComponent<HeroInput>();
-         _heroInputs[i].buttonDown += DoAction;
-		   _heroInputs[i].buttonUp += StopMove;
-		   _heroInputs[i].buttonJump += ReadyJump;
-       }
-    //   _spaceGravity.GravityForce += SetGravityVector;
+       _buttonLeftRun.OnClickMoveLeft += TransitionMovingLeft;
+       _buttonRightRun.OnClickMoveRight += TransitionMovingRight;
+       _buttonLeftRun.OnUpMoveLeft += StopMove;
+       _buttonRightRun.OnUpMoveRight += StopMove;
     }
 
     private void OnDisable()
     {
-       for( int i = 0 ; i < _heroInputs.Length ; i++ )
-       {
-          _heroInputs[i].buttonDown -= DoAction;
-		    _heroInputs[i].buttonUp -= StopMove;
-		    _heroInputs[i].buttonJump -= ReadyJump;
-       }
-     //  _spaceGravity.GravityForce -= SetGravityVector;
+       _buttonLeftRun.OnClickMoveLeft -= TransitionMovingLeft;
+       _buttonRightRun.OnClickMoveRight -= TransitionMovingRight;
+       _buttonLeftRun.OnUpMoveLeft -= StopMove;
+       _buttonRightRun.OnUpMoveRight -= StopMove;
     }
+   public void TransitionMovingLeft() => _typeMove.TransitionMovingLeft( this );
+   
+   public void TransitionMovingRight() => _typeMove.TransitionMovingRight( this );
 
-   private void DoAction( HeroInput input )
+   public void Stop() => _typeMove.Stop( this );
+
+   public void Move( Vector3 gravityVector ) => _typeMove.Move( this, _rigidbody, gravityVector );
+
+   public void SetMoveState( IMoverState state ) => _typeMove = state;
+
+   private void StopMove() => Stop();
+
+   private void CheckGround( Transform target )
    {
-	 if( input.name == "MoveLeft" )
-	 {
-		heroState = new MovingLeftState();
-	 }
-	 else if( input.name == "MoveRight" )
-	 {
-		heroState = new MovingRightState();
-	 }
-	 //_stateMove = _actionsHero.actionsValue[input.name];
+      RaycastHit2D hitDown = Physics2D.Raycast( target.position, -transform.up, 0.1f, _maskaPlace );
+
+      if( hitDown.collider && hitDown.collider.tag == "Green" )
+      {
+         _isGround = true;
+      }
    }
-
-   private void StopMove( HeroInput input )
-   {
-		heroState = new MovingStopState();
-	 //_stateMove = _actionsHero.actionsValue["None"];
-   }
-   private void ReadyJump()
-   {
-	//_stateMove = _actionsHero.actionsValue["Jump"];
-   }
-
-   private void FixedUpdate()
-   {   
-
-     // UpdateDirectionFall?.Invoke(this);
-    
-   }
-
-
    private void Update()
    {
-
-	   
+      CheckGround(_legs);
    }
 }
