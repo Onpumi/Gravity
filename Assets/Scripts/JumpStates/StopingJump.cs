@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class StopingJump : IJumpingState
@@ -14,7 +12,7 @@ public class StopingJump : IJumpingState
         hero.SetJumpState(new JumpingUp());
     }
     public void TransitionMoveDown( Hero hero ) { }
-    public void Jump( AnimationCurve curve,Hero hero, Rigidbody2D rigidbody, bool isCanCurveAnimation )
+    public void Jump( Hero hero, Rigidbody2D rigidbody )
     {
     }
 }

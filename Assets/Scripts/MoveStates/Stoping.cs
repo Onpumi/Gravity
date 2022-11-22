@@ -27,7 +27,7 @@ class Stoping: IMoverState
    
     public void Move( Hero hero, Rigidbody2D rigidbody, Vector3 gravityVector )
    {
-
+        //rigidbody.velocity = Vector2.zero;
    }
 
 }

@@ -30,7 +30,7 @@ public class HeroMover : MonoBehaviour
 	      _rigidbody = GetComponent<Rigidbody2D>();
         _collider = GetComponent<CircleCollider2D>();
       	_targetPosition = _rigidbody.position;
-        RadiusCollider =  _collider.radius;
+//        RadiusCollider =  _collider.radius;
         _dirForward = new Vector3(1,0,0);
         _moveTransitions = new MoveTransitions();
     }
@@ -58,13 +58,14 @@ public class HeroMover : MonoBehaviour
     private void SetPhysicGravity() => Physics2D.gravity = _space.GravityVector*_space.GravityForce;
     
 
-
+/*
     private void Update()
     { 
        // RotateObject( -_space.GravityVector );
      //  if(_hero.IsCanJump)
        //_hero.Jump();
     }
+*/
 
     private void FixedUpdate()
     {
@@ -73,8 +74,14 @@ public class HeroMover : MonoBehaviour
            //_hero.Move(_space.GravityVector);
            
          //  SetPhysicGravity();
-    }
+        
+         if( Input.GetAxis("Cancel") > 0 )
+ 	    {
+	       Application.Quit();
+	    }
 
+    }
+/*
     private void LateUpdate()
     {
 
@@ -85,6 +92,8 @@ public class HeroMover : MonoBehaviour
     //  Debug.DrawLine( transform.position, transform.position + _heroground.GetNormalWithRaycast() * 5f, Color.blue );
      // Debug.DrawLine( transform.position, transform.position + _space.GravityVector * 5f, Color.green );
     }
+
+    */
 
 }
 

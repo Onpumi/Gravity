@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class JumpingDown : IJumpingState
@@ -9,14 +7,15 @@ public class JumpingDown : IJumpingState
     public void StopJump( Hero hero ) { }
     public void TransitionMoveUp( Hero hero ) { }
     public void TransitionMoveDown( Hero hero ) { }
-    public void Jump( AnimationCurve curve, Hero hero, Rigidbody2D rigidbody, bool isCanCurveAnimation )
+    public void Jump( Hero hero, Rigidbody2D rigidbody )
     {
 
+            hero.CheckGround( -Vector2.up );
             if( hero.IsGround )
             {
                 rigidbody.gravityScale = 5f;
                 hero.SetJumpState(new StopingJump());
-                Debug.Log("упали");
+                Debug.Log("упали " + hero.IsGround);
             }
     }
 }

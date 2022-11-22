@@ -19,7 +19,8 @@ public class HeroGround : MonoBehaviour
     {
     	_hero = GetComponent<Hero>();
       _collider = GetComponent<CircleCollider2D>();
-      RadiusCollider = _collider.radius;
+//      RadiusCollider = _collider.radius;
+        RadiusCollider = 0.5f;
     }
 
      private void OnEnable()

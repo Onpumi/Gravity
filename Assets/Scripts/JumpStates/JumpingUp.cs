@@ -1,6 +1,4 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class JumpingUp : Jumping, IJumpingState
@@ -30,30 +28,18 @@ public class JumpingUp : Jumping, IJumpingState
         hero.SetJumpState(new JumpingDown());
     }
     
-    public void Jump( AnimationCurve curve, Hero hero, Rigidbody2D rigidbody, bool isCanCurveAnimation )
+    public void Jump( Hero hero, Rigidbody2D rigidbody )
     {
+      
+      // SetPositionRigidbody( hero, rigidbody );
+       SetPositionRigidbody( hero, hero.Rigidbody );
 
-        if( isCanCurveAnimation == false )
-        {
-            hero.SetJumpState(new JumpingDown());
-        }
-
-       SetPositionRigidbody( hero, curve, rigidbody, isCanCurveAnimation );
-
-     /*
-       if( CurrentTime >= curve.keys[curve.length-1].time )
-       {
-         CurrentTime = 0;
-         OnFinishJump?.Invoke( hero );
-       }
-       */
        if( _deltaJump >= _heightJump )
        {
          rigidbody.gravityScale = 5f;
          OnFinishJump?.Invoke( hero );
-       }
-       //rigidbody.position.y  
 
-        
+       }
+
     }
 }
